@@ -1,2 +1,8 @@
 # TVSDKDemo
-QQMusic TVSDK Demo
+
+1. **更多信息请参考QQMusicTVSDK开发文档**
+
+2. **代码里面的账号是测试账号，正式环境无法使用，发布之前要进行替换**
+
+   
+

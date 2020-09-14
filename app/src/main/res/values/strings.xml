@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">TVSDKDemo</string>
+    <string name="tab_text_1">微信登录</string>
+    <string name="tab_text_2">QQ登录</string>
+    <string name="tab_text_3">歌曲播放</string>
+    <string name="tab_text_4">MV播放</string>
+</resources>
