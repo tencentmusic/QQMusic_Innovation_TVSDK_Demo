@@ -41,7 +41,7 @@ class MusicPlayerFragment : Fragment() {
 
     private val clickListener = View.OnClickListener {
         when(it?.id) {
-            R.id.play -> {
+            R.id.playSongs -> {
                 playerManager.playSongs(getSongs(), 0)
                 LyricManager.instance.startLoadLyric(0)
             }
@@ -59,7 +59,7 @@ class MusicPlayerFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         val view = inflater.inflate(R.layout.fragment_music_player, container, false)
-        play = view.findViewById(R.id.play)
+        play = view.findViewById(R.id.playSongs)
         play.setOnClickListener(clickListener)
 
         next = view.findViewById(R.id.next)

@@ -8,6 +8,7 @@ import androidx.viewpager.widget.ViewPager
 import androidx.appcompat.app.AppCompatActivity
 import android.view.Menu
 import android.view.MenuItem
+import com.tencent.qqmusictvsdk.QQMusicSDK
 import com.tencent.qqmusictvsdkdemo.ui.main.SectionsPagerAdapter
 
 class MainActivity : AppCompatActivity() {
@@ -20,6 +21,10 @@ class MainActivity : AppCompatActivity() {
         viewPager.adapter = sectionsPagerAdapter
         val tabs: TabLayout = findViewById(R.id.tabs)
         tabs.setupWithViewPager(viewPager)
+    }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        QQMusicSDK.deinit()
     }
 }

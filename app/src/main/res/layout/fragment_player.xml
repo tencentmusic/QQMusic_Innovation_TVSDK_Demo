@@ -21,17 +21,29 @@
             android:layout_weight="1"
             android:text="Prev" />
         <Button
-            android:id="@+id/play"
+            android:id="@+id/playSongs"
             android:layout_width="0dp"
             android:layout_weight="1"
             android:layout_height="wrap_content"
-            android:text="Play" />
+            android:text="PlaySongs" />
+        <Button
+            android:id="@+id/playMV"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:text="PlayMV" />
         <Button
             android:id="@+id/next"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="Next" />
+        <Button
+            android:id="@+id/play"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Play" />
     </LinearLayout>
 
     <FrameLayout
