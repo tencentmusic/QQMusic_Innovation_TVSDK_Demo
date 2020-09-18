@@ -4,4 +4,25 @@
     <string name="tab_text_2">QQ登录</string>
     <string name="tab_text_3">歌曲播放</string>
     <string name="tab_text_4">MV播放</string>
+    <string-array name="songQuality">
+        <item>无损</item>
+        <item>高品质</item>
+        <item>标准品质</item>
+    </string-array>
+    <string-array name="mvResolution">
+        <item>蓝光</item>
+        <item>超清</item>
+        <item>高清</item>
+        <item>标清</item>
+    </string-array>
+    <string-array name="soundEffect">
+        <item>无音效</item>
+        <item>全景环绕</item>
+        <item>超重低音</item>
+        <item>清澈人声</item>
+        <item>现场律动</item>
+        <item>温暖轻柔</item>
+        <item>华丽复古</item>
+        <item>开阔宽音</item>
+    </string-array>
 </resources>

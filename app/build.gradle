@@ -36,7 +36,7 @@ android {
         targetCompatibility JavaVersion.VERSION_1_8
     }
 }
-configurations.getByName("implementation") {
+configurations.all {
     resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
     resolutionStrategy.cacheDynamicVersionsFor 0, 'seconds'
 }
@@ -50,7 +50,7 @@ dependencies {
     implementation 'androidx.lifecycle:lifecycle-extensions:2.2.0'
     implementation 'androidx.multidex:multidex:2.0.1'
     implementation 'com.github.bumptech.glide:glide:4.11.0'
-    implementation ("com.tencent.qqmusictv:qqmusictvsdk:0.3-SNAPSHOT") {
+    implementation ("com.tencent.qqmusictv:qqmusictvsdk:0.4-SNAPSHOT") {
         changing = true
     }
 }

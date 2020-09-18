@@ -1,22 +1,24 @@
 package com.tencent.qqmusictvsdkdemo.ui.main
 
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
+import android.os.Message
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
-import android.widget.FrameLayout
+import android.widget.*
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.fragment.app.Fragment
 import com.tencent.qqmusicsdk.protocol.PlayStateHelper
 import com.tencent.qqmusictvsdk.QQMusicSDK
 import com.tencent.qqmusictvsdk.lyric.LyricManager
+import com.tencent.qqmusictvsdk.player.*
+import com.tencent.qqmusictvsdk.player.ErrorCode.ERROR_OK
+import com.tencent.qqmusictvsdk.player.Event.API_EVENT_MV_PLAY_ERROR
 import com.tencent.qqmusictvsdk.player.Event.API_EVENT_PLAY_STATE_CHANGED
-import com.tencent.qqmusictvsdk.player.IMediaEventListener
-import com.tencent.qqmusictvsdk.player.IPlayerManager
-import com.tencent.qqmusictvsdk.player.MVInfo
-import com.tencent.qqmusictvsdk.player.SongInfo
+import com.tencent.qqmusictvsdk.player.Event.API_EVENT_SONG_PLAY_ERROR
 import com.tencent.qqmusictvsdkdemo.R
 
 /*
@@ -54,6 +56,16 @@ class PlayerFragment : Fragment() {
     lateinit var next: Button
     lateinit var prev: Button
     lateinit var startPlayMV: FrameLayout
+    lateinit var songinfo: TextView
+    lateinit var currTime: TextView
+    lateinit var totleTime: TextView
+    lateinit var progressBar: SeekBar
+    lateinit var mSongInfo: SongInfo
+    lateinit var mMVInfo: MVInfo
+    lateinit var songQuality: Spinner
+    lateinit var mvResolution: Spinner
+    lateinit var soundEffect: Spinner
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         playerManager = QQMusicSDK.getPlayerManager()
@@ -76,6 +88,45 @@ class PlayerFragment : Fragment() {
                         play.text = "Play"
                     }
                 }
+                API_EVENT_SONG_PLAY_ERROR -> {
+                    var code = arg.getInt(Key.API_RETURN_KEY_CODE)
+                    if (code == ERROR_OK) {
+                        uiThread {
+                            mSongInfo = playerManager.getCurrentSongInfo()
+                            songinfo.text = "${mSongInfo.song_name}---${mSongInfo.singer_name}"
+                            totleTime.text = playerManager.getDuration()?.let { getTime(it) }
+                            timeHandler.sendEmptyMessageDelayed(0, 1000)
+                        }
+                    }
+                }
+                API_EVENT_MV_PLAY_ERROR -> {
+                    var code = arg.getInt(Key.API_RETURN_KEY_CODE)
+                    if (code == ERROR_OK) {
+                        uiThread {
+                            mMVInfo = playerManager.getCurrentMVInfo()!!
+                            songinfo.text = "${mMVInfo.mv_title}---${mMVInfo.singers[0].name}"
+                            totleTime.text = playerManager.getDuration()?.let { getTime(it) }
+                            timeHandler.sendEmptyMessageDelayed(0, 1000)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private val timeHandler = object : Handler(Looper.getMainLooper()) {
+        override fun handleMessage(msg: Message) {
+            super.handleMessage(msg)
+            uiThread {
+                var currTimeInt = playerManager.getCurrentPlayTime()
+                if (currTimeInt != null) {
+                    currTime.text = getTime(currTimeInt)
+                    var duration = playerManager.getDuration()
+                    if (duration != 0L) {
+                        progressBar.progress = (currTimeInt * 100 / duration!!).toInt()
+                    }
+                }
+                sendEmptyMessageDelayed(0, 1000)
             }
         }
     }
@@ -135,6 +186,93 @@ class PlayerFragment : Fragment() {
         prev = view.findViewById(R.id.prev)
         prev.setOnClickListener(clickListener)
         startPlayMV = view.findViewById(R.id.mv_play)
+        songinfo = view.findViewById(R.id.songinfo)
+        currTime = view.findViewById(R.id.currTime)
+        totleTime = view.findViewById(R.id.totleTime)
+        progressBar = view.findViewById(R.id.progress_bar_h)
+        progressBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener{
+            override fun onProgressChanged(p0: SeekBar?, progress: Int, isFromUser: Boolean) {
+                if (isFromUser) {
+                    playerManager.seek((progress * playerManager.getDuration()!! / 100 ).toInt())
+                }
+            }
+
+            override fun onStartTrackingTouch(p0: SeekBar?) {
+            }
+
+            override fun onStopTrackingTouch(p0: SeekBar?) {
+            }
+
+        })
+
+        songQuality = view.findViewById(R.id.songQuality)
+        songQuality.onItemSelectedListener = object : AdapterView.OnItemSelectedListener{
+            override fun onNothingSelected(p0: AdapterView<*>?) {
+
+            }
+
+            override fun onItemSelected(p0: AdapterView<*>?, p1: View?, pos: Int, id: Long) {
+                when(pos) {
+                    0 -> playerManager.setSongQuality(PlayerEnums.Quality.SQ)
+                    1 -> playerManager.setSongQuality(PlayerEnums.Quality.HQ)
+                    2 -> playerManager.setSongQuality(PlayerEnums.Quality.BZ)
+                }
+            }
+        }
+        mvResolution = view.findViewById(R.id.mvResolution)
+        mvResolution.onItemSelectedListener = object : AdapterView.OnItemSelectedListener{
+            override fun onNothingSelected(p0: AdapterView<*>?) {
+
+            }
+
+            override fun onItemSelected(p0: AdapterView<*>?, p1: View?, pos: Int, id: Long) {
+                when(pos) {
+                    0 -> playerManager.setMVResolution(PlayerEnums.Resolution.LAN_GUANG)
+                    1 -> playerManager.setMVResolution(PlayerEnums.Resolution.CHAO_QING)
+                    2 -> playerManager.setMVResolution(PlayerEnums.Resolution.GAO_QING)
+                    3 -> playerManager.setMVResolution(PlayerEnums.Resolution.BIAO_QING)
+                }
+            }
+        }
+        soundEffect = view.findViewById(R.id.soundEffect)
+        soundEffect.onItemSelectedListener = object : AdapterView.OnItemSelectedListener{
+            override fun onNothingSelected(p0: AdapterView<*>?) {
+
+            }
+
+            override fun onItemSelected(p0: AdapterView<*>?, p1: View?, pos: Int, id: Long) {
+                when(pos) {
+                    0 -> playerManager.setSongEffectType(PlayerEnums.EffectType.NONE_TYPE)
+                    1 -> playerManager.setSongEffectType(PlayerEnums.EffectType.SURROUND_TYPE)
+                    2 -> playerManager.setSongEffectType(PlayerEnums.EffectType.BASS_TYPE)
+                    3 -> playerManager.setSongEffectType(PlayerEnums.EffectType.VOCAL_TYPE)
+                    4 -> playerManager.setSongEffectType(PlayerEnums.EffectType.STUDIO_PRESET)
+                    5 -> playerManager.setSongEffectType(PlayerEnums.EffectType.WARM_PRESET)
+                    6 -> playerManager.setSongEffectType(PlayerEnums.EffectType.RETRO_PRESET)
+                    7 -> playerManager.setSongEffectType(PlayerEnums.EffectType.WIDE_PRESET)
+                }
+            }
+        }
         return view
+    }
+
+    fun uiThread(block: () -> Unit) {
+        if (Thread.currentThread() !== Looper.getMainLooper().thread) {
+            //不在主线程
+            Handler(Looper.getMainLooper()).post(block)
+        } else {
+            block()
+        }
+    }
+
+    private fun getTime(time: Long): String? {
+        val m = (time / (60 * 1000)).toInt()
+        val s = (time % (60 * 1000) / 1000).toInt()
+        val mi = m.toString()
+        var se = s.toString()
+        if (s < 10) {
+            se = "0$s"
+        }
+        return "$mi:$se"
     }
 }

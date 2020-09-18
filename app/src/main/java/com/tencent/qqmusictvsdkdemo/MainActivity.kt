@@ -10,6 +10,7 @@ import android.view.Menu
 import android.view.MenuItem
 import com.tencent.qqmusictvsdk.QQMusicSDK
 import com.tencent.qqmusictvsdkdemo.ui.main.SectionsPagerAdapter
+import kotlin.system.exitProcess
 
 class MainActivity : AppCompatActivity() {
 
@@ -26,5 +27,6 @@ class MainActivity : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
         QQMusicSDK.deinit()
+        exitProcess(0)
     }
 }
