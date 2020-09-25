@@ -82,7 +82,7 @@ class LoginFragment : Fragment(), CoroutineScope {
     override fun onStart() {
         super.onStart()
         QQMusicSDK.getDiffDevAuth(type).also {
-            it.start(listener)
+            it.start("", listener)
         }
     }
 
