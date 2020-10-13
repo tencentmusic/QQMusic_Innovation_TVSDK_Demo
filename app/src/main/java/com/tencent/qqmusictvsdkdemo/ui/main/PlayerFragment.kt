@@ -13,7 +13,6 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.fragment.app.Fragment
 import com.tencent.qqmusicsdk.protocol.PlayStateHelper
 import com.tencent.qqmusictvsdk.QQMusicSDK
-import com.tencent.qqmusictvsdk.lyric.LyricManager
 import com.tencent.qqmusictvsdk.player.*
 import com.tencent.qqmusictvsdk.player.ErrorCode.ERROR_OK
 import com.tencent.qqmusictvsdk.player.Event.API_EVENT_MV_PLAY_ERROR
@@ -148,7 +147,6 @@ class PlayerFragment : Fragment() {
             }
             R.id.playSongs -> {
                 playerManager.playSongs(getSongs(), 0)
-                LyricManager.instance.startLoadLyric(0)
             }
             R.id.next -> {
                 playerManager.next()

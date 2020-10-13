@@ -7,7 +7,6 @@ import android.view.ViewGroup
 import android.widget.Button
 import androidx.fragment.app.Fragment
 import com.tencent.qqmusictvsdk.QQMusicSDK
-import com.tencent.qqmusictvsdk.lyric.LyricManager
 import com.tencent.qqmusictvsdk.player.IPlayerManager
 import com.tencent.qqmusictvsdk.player.SongInfo
 import com.tencent.qqmusictvsdkdemo.R
@@ -43,7 +42,6 @@ class MusicPlayerFragment : Fragment() {
         when(it?.id) {
             R.id.playSongs -> {
                 playerManager.playSongs(getSongs(), 0)
-                LyricManager.instance.startLoadLyric(0)
             }
             R.id.next -> {
                 playerManager.next()
