@@ -4,6 +4,9 @@ buildscript {
     repositories {
         google()
         jcenter()
+        maven { url 'https://mirrors.tencent.com/nexus/repository/maven-public/'}
+        maven { url 'https://mirrors.tencent.com/repository/maven/thirdparty' }
+        maven { url 'https://mirrors.tencent.com/repository/maven/thirdparty-snapshots/' }
     }
     dependencies {
         classpath "com.android.tools.build:gradle:3.6.0"
@@ -18,6 +21,9 @@ allprojects {
     repositories {
         google()
         jcenter()
+        maven { url 'https://mirrors.tencent.com/nexus/repository/maven-public/'}
+        maven { url 'https://mirrors.tencent.com/repository/maven/thirdparty' }
+        maven { url 'https://mirrors.tencent.com/repository/maven/thirdparty-snapshots/' }
         maven { 
             url 'http://ct.y.qq.com/TVapp/nexus/repository/maven-public/'
              credentials {

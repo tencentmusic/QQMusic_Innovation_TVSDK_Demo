@@ -13,7 +13,6 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.fragment.app.Fragment
 import com.tencent.qqmusicsdk.protocol.PlayStateHelper
 import com.tencent.qqmusictvsdk.QQMusicSDK
-import com.tencent.qqmusictvsdk.lyric.LyricManager
 import com.tencent.qqmusictvsdk.player.*
 import com.tencent.qqmusictvsdk.player.ErrorCode.ERROR_OK
 import com.tencent.qqmusictvsdk.player.Event.API_EVENT_MV_PLAY_ERROR
@@ -33,7 +32,7 @@ class PlayerFragment : Fragment() {
         const val TAG = "PlayerFragment"
     }
     private fun getMV(): ArrayList<MVInfo> {
-        return ArrayList(listOf("g00349jxqpw", "r0034oiuica", "i0034xbq2g9").map {
+        return ArrayList(listOf("s0019nmbrrx", "r0034oiuica", "i0034xbq2g9").map {
             MVInfo().also { mv ->
                 mv.mv_vid = it
             }
@@ -42,7 +41,7 @@ class PlayerFragment : Fragment() {
 
     private fun getSongs(): ArrayList<SongInfo> {
 
-        return ArrayList(listOf("002w57E00BGzXn", "002VIFU90S4ICL", "002GwAma2DGN2x").map {
+        return ArrayList(listOf("002w57E00BGzXn", "002VIFU90S4ICL", "0039MnYb0qxYhV").map {
             SongInfo().also { song ->
                 song.song_mid = it
             }
@@ -60,7 +59,7 @@ class PlayerFragment : Fragment() {
     lateinit var currTime: TextView
     lateinit var totleTime: TextView
     lateinit var progressBar: SeekBar
-    lateinit var mSongInfo: SongInfo
+    var mSongInfo: SongInfo? = null
     lateinit var mMVInfo: MVInfo
     lateinit var songQuality: Spinner
     lateinit var mvResolution: Spinner
@@ -93,7 +92,7 @@ class PlayerFragment : Fragment() {
                     if (code == ERROR_OK) {
                         uiThread {
                             mSongInfo = playerManager.getCurrentSongInfo()
-                            songinfo.text = "${mSongInfo.song_name}---${mSongInfo.singer_name}"
+                            songinfo.text = "${mSongInfo?.song_name}---${mSongInfo?.singer_name}"
                             totleTime.text = playerManager.getDuration()?.let { getTime(it) }
                             timeHandler.sendEmptyMessageDelayed(0, 1000)
                         }
@@ -148,7 +147,6 @@ class PlayerFragment : Fragment() {
             }
             R.id.playSongs -> {
                 playerManager.playSongs(getSongs(), 0)
-                LyricManager.instance.startLoadLyric(0)
             }
             R.id.next -> {
                 playerManager.next()

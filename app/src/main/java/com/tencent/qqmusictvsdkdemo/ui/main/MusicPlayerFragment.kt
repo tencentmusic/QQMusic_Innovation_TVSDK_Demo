@@ -7,7 +7,6 @@ import android.view.ViewGroup
 import android.widget.Button
 import androidx.fragment.app.Fragment
 import com.tencent.qqmusictvsdk.QQMusicSDK
-import com.tencent.qqmusictvsdk.lyric.LyricManager
 import com.tencent.qqmusictvsdk.player.IPlayerManager
 import com.tencent.qqmusictvsdk.player.SongInfo
 import com.tencent.qqmusictvsdkdemo.R
@@ -23,7 +22,7 @@ class MusicPlayerFragment : Fragment() {
 
     private fun getSongs(): ArrayList<SongInfo> {
 
-        return ArrayList(listOf("002w57E00BGzXn", "002VIFU90S4ICL", "002GwAma2DGN2x").map {
+        return ArrayList(listOf("002w57E00BGzXn", "002VIFU90S4ICL", "0039MnYb0qxYhV").map {
             SongInfo().also { song ->
                 song.song_mid = it
             }
@@ -43,7 +42,6 @@ class MusicPlayerFragment : Fragment() {
         when(it?.id) {
             R.id.playSongs -> {
                 playerManager.playSongs(getSongs(), 0)
-                LyricManager.instance.startLoadLyric(0)
             }
             R.id.next -> {
                 playerManager.next()
