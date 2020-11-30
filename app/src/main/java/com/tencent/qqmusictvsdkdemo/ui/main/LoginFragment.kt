@@ -74,7 +74,7 @@ class LoginFragment : Fragment(), CoroutineScope {
             val userInfo = QQMusicSDK.getAccountManager().getAccount()
             launch {
                 Glide.with(activity!!).load(userInfo.avatarUrl).into(avatarImageView)
-                nickname.text = userInfo.nickname
+                nickname.text = userInfo.nickname + " VIP: " + userInfo.vipInfo.type + " 到期时间：" + userInfo.vipInfo.endTime
             }
         }
     }

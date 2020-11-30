@@ -1,5 +1,10 @@
 package com.tencent.qqmusictvsdkdemo.ui.main
 
+import android.Manifest
+import android.content.Context
+import android.content.pm.PackageManager
+import android.media.session.MediaController
+import android.media.session.MediaSessionManager
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -10,15 +15,24 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.content.ContextCompat
+import androidx.core.content.ContextCompat.getSystemService
 import androidx.fragment.app.Fragment
+import com.tencent.qqmusic.innovation.common.logging.MLog
+import com.tencent.qqmusic.innovation.common.util.UtilContext
 import com.tencent.qqmusicsdk.protocol.PlayStateHelper
 import com.tencent.qqmusictvsdk.QQMusicSDK
 import com.tencent.qqmusictvsdk.player.*
 import com.tencent.qqmusictvsdk.player.ErrorCode.ERROR_OK
+import com.tencent.qqmusictvsdk.player.Event.API_EVENT_LIVE_STATUS_CHANGED
 import com.tencent.qqmusictvsdk.player.Event.API_EVENT_MV_PLAY_ERROR
+import com.tencent.qqmusictvsdk.player.Event.API_EVENT_PLAY_MV_DEFINITION_CHANGED
+import com.tencent.qqmusictvsdk.player.Event.API_EVENT_PLAY_MV_SIZE_CHANGED
 import com.tencent.qqmusictvsdk.player.Event.API_EVENT_PLAY_STATE_CHANGED
 import com.tencent.qqmusictvsdk.player.Event.API_EVENT_SONG_PLAY_ERROR
 import com.tencent.qqmusictvsdkdemo.R
+import kotlin.coroutines.resume
+
 
 /*
  * Copyright (C) 2020 Tencent Music Entertainment Group. All Rights Reserved. 
@@ -32,16 +46,28 @@ class PlayerFragment : Fragment() {
         const val TAG = "PlayerFragment"
     }
     private fun getMV(): ArrayList<MVInfo> {
-        return ArrayList(listOf("s0019nmbrrx", "r0034oiuica", "i0034xbq2g9").map {
+        return ArrayList(listOf("s0019nmbrrx", "w0016esuaxk", "i0034xbq2g9").map {
             MVInfo().also { mv ->
                 mv.mv_vid = it
             }
         })
     }
 
+    private fun getMVByID(): ArrayList<MVInfo> {
+        return ArrayList(listOf(1656149).map {
+            MVInfo().also { mv ->
+                mv.mv_id = it
+            }
+        })
+    }
+
+    private fun getShow(): ShowInfo {
+        return ShowInfo(1846658, "", "")
+    }
+
     private fun getSongs(): ArrayList<SongInfo> {
 
-        return ArrayList(listOf("002w57E00BGzXn", "002VIFU90S4ICL", "0039MnYb0qxYhV").map {
+        return ArrayList(listOf("001REfcD4XGaxu", "002KeTbt4c96Zv", "002KeTbt4c96Zv").map {
             SongInfo().also { song ->
                 song.song_mid = it
             }
@@ -49,6 +75,7 @@ class PlayerFragment : Fragment() {
     }
 
     lateinit var playerManager: IPlayerManager
+    lateinit var playShow: Button
     lateinit var playMV: Button
     lateinit var playSongs: Button
     lateinit var play: Button
@@ -69,7 +96,9 @@ class PlayerFragment : Fragment() {
         super.onCreate(savedInstanceState)
         playerManager = QQMusicSDK.getPlayerManager()
         playerManager.registerEventListener(mIMediaEventListener)
+
     }
+
 
     override fun onDestroy() {
         super.onDestroy()
@@ -109,6 +138,22 @@ class PlayerFragment : Fragment() {
                         }
                     }
                 }
+                API_EVENT_PLAY_MV_DEFINITION_CHANGED -> {
+                    var defList = arg.getStringArrayList(Key.API_EVENT_KEY_MV_DEFINITION_LIST)
+                    var curDef = arg.getString(Key.API_EVENT_KEY_MV_CUR_DEFINITION)
+
+                    Log.d(TAG, "API_EVENT_PLAY_MV_DEFINITION_CHANGED defList= $defList, curDef = $curDef")
+                }
+                API_EVENT_PLAY_MV_SIZE_CHANGED -> {
+                    var width = arg.getInt(Key.API_EVENT_KEY_MV_SIZE_WIDTH)
+                    var height = arg.getInt(Key.API_EVENT_KEY_MV_SIZE_HEIGHT)
+                    Log.d(TAG, "API_EVENT_PLAY_MV_SIZE_CHANGED width= $width, height = $height")
+                }
+                API_EVENT_LIVE_STATUS_CHANGED -> {
+                    var liveStatus = arg.getInt(Key.API_EVENT_KEY_LIVE_STATUS)
+                    var waitTime = arg.getLong(Key.API_EVENT_KEY_LIVE_WAITING_TIME)
+                    Log.d(TAG, "API_EVENT_LIVE_STATUS_CHANGED liveStatus= $liveStatus, waitTime = $waitTime")
+                }
             }
         }
     }
@@ -134,6 +179,19 @@ class PlayerFragment : Fragment() {
         when(it?.id) {
             R.id.playMV -> {
                 var mvView = playerManager.playMV(getMV(), 0) as View
+                mvView.layoutParams = FrameLayout.LayoutParams(
+                    ConstraintLayout.LayoutParams.MATCH_PARENT,
+                    ConstraintLayout.LayoutParams.MATCH_PARENT
+                )
+                mvView.visibility = View.VISIBLE
+                val vg = mvView.parent
+                if (vg != null) {
+                    (vg as ViewGroup).removeViewInLayout(mvView)
+                }
+                startPlayMV.addView(mvView)
+            }
+            R.id.playShow -> {
+                var mvView = playerManager.playLive(getShow()) as View
                 mvView.layoutParams = FrameLayout.LayoutParams(
                     ConstraintLayout.LayoutParams.MATCH_PARENT,
                     ConstraintLayout.LayoutParams.MATCH_PARENT
@@ -175,6 +233,8 @@ class PlayerFragment : Fragment() {
         playMV = view.findViewById(R.id.playMV)
         playMV.setOnClickListener(clickListener)
 
+        playShow = view.findViewById(R.id.playShow)
+        playShow.setOnClickListener(clickListener)
         playSongs = view.findViewById(R.id.playSongs)
         playSongs.setOnClickListener(clickListener)
 
