@@ -1,3 +1,7 @@
+import java.nio.file.Files
+import java.nio.file.Paths
+import java.nio.file.StandardCopyOption
+
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
@@ -16,10 +20,17 @@ android {
         ndk {
             // Tells Gradle to build outputs for the following ABIs and package
             // them into your APK.
-            abiFilters  'armeabi'
+            abiFilters  'armeabi','armeabi-v7a'
         }
     }
-
+    signingConfigs {
+        local {
+            storeFile file("../android-release-key.keystore")
+            storePassword "qqmusic"
+            keyAlias "androidreleasekey"
+            keyPassword "qqmusic"
+        }
+    }
     buildTypes {
         debug {
             debuggable true
@@ -29,6 +40,7 @@ android {
             debuggable false
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.local
         }
     }
     compileOptions {
@@ -52,5 +64,42 @@ dependencies {
     implementation 'com.github.bumptech.glide:glide:4.11.0'
     implementation ("com.tencent.qqmusictv:qqmusictvsdk:1.1-SNAPSHOT") {
         changing = true
+    }
+}
+
+gradle.taskGraph.afterTask { task ->
+    String abi = "lib/armeabi-v7a/"
+    def TASK_NAME = "transformNativeLibsWithStripDebugSymbolFor"
+    println(task.name)
+    String buildType = "debug"
+    if (task.name.toLowerCase().contains("release")) {
+        buildType = "release"
+    }
+    //String buildType = task.name.substring(TASK_NAME.length()).toLowerCase(Locale.US)
+    File root = new File(buildDir, "intermediates/merged_native_libs/${buildType}")
+    if(root == null) return
+    if(root.listFiles() == null) return
+    if(root.listFiles().length == 0) return
+    File numberDir = root.listFiles()[0]
+    if (!numberDir.isDirectory()) {
+        return
+    }
+    File soDir = new File(numberDir, "lib/armeabi")
+    for (File soFile : soDir.listFiles()) {
+        def toFile = new File(numberDir, abi + soFile.name)
+//        FileUtils.copyFile(soFile, toFile)
+        try{
+            File toDir = new File(numberDir, abi)
+            if (!toDir.exists()) {
+                toDir.mkdirs()
+            }
+            if (!toFile.exists()) {
+                toFile.createNewFile()
+            }
+            Files.copy(Paths.get(soFile.getAbsolutePath()),Paths.get(toFile.getAbsolutePath()), StandardCopyOption.REPLACE_EXISTING)
+        }catch (Exception e){
+            System.out.println(">>>>>>>>>>" + e)
+        }
+        println "toFile" + toFile
     }
 }

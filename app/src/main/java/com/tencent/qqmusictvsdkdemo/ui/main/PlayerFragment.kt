@@ -67,7 +67,7 @@ class PlayerFragment : Fragment() {
 
     private fun getSongs(): ArrayList<SongInfo> {
 
-        return ArrayList(listOf("001REfcD4XGaxu", "002KeTbt4c96Zv", "002KeTbt4c96Zv").map {
+        return ArrayList(listOf("002XWgfo0IKPOH", "000CkeJf1hyLH2", "0033N6Jr4DvOl9", "004Z8Ihr0JIu5s").map {
             SongInfo().also { song ->
                 song.song_mid = it
             }

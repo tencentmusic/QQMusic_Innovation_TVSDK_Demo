@@ -50,7 +50,7 @@ class App : MultiDexApplication() {
     }
     override fun onCreate() {
         super.onCreate()
-        QQMusicSDK.init(applicationContext, OPI_APP_ID, OPI_APP_KEY, localTokenProvider, BuildConfig.DEBUG)
+        QQMusicSDK.init(applicationContext, OPI_APP_ID, OPI_APP_KEY, localTokenProvider, true)
     }
     companion object {
         const val TAG = "App"
