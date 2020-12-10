@@ -143,6 +143,7 @@
 
 
 
+-keep class com.tencent.qqmusictvsdk.internal.** { *; }
 -keep class com.tencent.qqmusictvsdk.account.** { *; }
 -keep class com.tencent.qqmusictvsdk.auth.** { *; }
 -keep class com.tencent.qqmusictvsdk.lyric.** { *; }
