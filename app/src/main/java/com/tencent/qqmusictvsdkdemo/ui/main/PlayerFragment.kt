@@ -28,8 +28,10 @@ import com.tencent.qqmusictvsdk.player.Event.API_EVENT_LIVE_STATUS_CHANGED
 import com.tencent.qqmusictvsdk.player.Event.API_EVENT_MV_PLAY_ERROR
 import com.tencent.qqmusictvsdk.player.Event.API_EVENT_PLAY_MV_DEFINITION_CHANGED
 import com.tencent.qqmusictvsdk.player.Event.API_EVENT_PLAY_MV_SIZE_CHANGED
+import com.tencent.qqmusictvsdk.player.Event.API_EVENT_PLAY_SONG_CHANGED
 import com.tencent.qqmusictvsdk.player.Event.API_EVENT_PLAY_STATE_CHANGED
 import com.tencent.qqmusictvsdk.player.Event.API_EVENT_SONG_PLAY_ERROR
+import com.tencent.qqmusictvsdk.player.PlayerEnums.Mode.ONE
 import com.tencent.qqmusictvsdkdemo.R
 import kotlin.coroutines.resume
 
@@ -46,7 +48,7 @@ class PlayerFragment : Fragment() {
         const val TAG = "PlayerFragment"
     }
     private fun getMV(): ArrayList<MVInfo> {
-        return ArrayList(listOf("s0019nmbrrx", "w0016esuaxk", "i0034xbq2g9").map {
+        return ArrayList(listOf("n003541cj5u","s0019nmbrrx", "w0016esuaxk", "i0034xbq2g9").map {
             MVInfo().also { mv ->
                 mv.mv_vid = it
             }
@@ -116,12 +118,16 @@ class PlayerFragment : Fragment() {
                         play.text = "Play"
                     }
                 }
+                API_EVENT_PLAY_SONG_CHANGED -> {
+                    uiThread {
+                        mSongInfo = playerManager.getCurrentSongInfo()
+                        songinfo.text = "${mSongInfo?.song_name}---${mSongInfo?.singer_name}"
+                    }
+                }
                 API_EVENT_SONG_PLAY_ERROR -> {
                     var code = arg.getInt(Key.API_RETURN_KEY_CODE)
-                    if (code == ERROR_OK) {
-                        uiThread {
-                            mSongInfo = playerManager.getCurrentSongInfo()
-                            songinfo.text = "${mSongInfo?.song_name}---${mSongInfo?.singer_name}"
+                    uiThread {
+                        if (code == ERROR_OK) {
                             totleTime.text = playerManager.getDuration()?.let { getTime(it) }
                             timeHandler.sendEmptyMessageDelayed(0, 1000)
                         }
@@ -179,6 +185,7 @@ class PlayerFragment : Fragment() {
         when(it?.id) {
             R.id.playMV -> {
                 var mvView = playerManager.playMV(getMV(), 0) as View
+                playerManager.setPlayMode(ONE)
                 mvView.layoutParams = FrameLayout.LayoutParams(
                     ConstraintLayout.LayoutParams.MATCH_PARENT,
                     ConstraintLayout.LayoutParams.MATCH_PARENT
@@ -215,6 +222,7 @@ class PlayerFragment : Fragment() {
             R.id.play -> {
                 if (PlayStateHelper.isPlayingForUI()) {
                     playerManager.pause()
+                    playerManager.updatePlayingSongList()
                 } else if (PlayStateHelper.isPausedForUI()) {
                     playerManager.play()
                 }
