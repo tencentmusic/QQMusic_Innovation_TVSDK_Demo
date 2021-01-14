@@ -1,10 +1,5 @@
 package com.tencent.qqmusictvsdkdemo.ui.main
 
-import android.Manifest
-import android.content.Context
-import android.content.pm.PackageManager
-import android.media.session.MediaController
-import android.media.session.MediaSessionManager
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -15,11 +10,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.core.content.ContextCompat
-import androidx.core.content.ContextCompat.getSystemService
 import androidx.fragment.app.Fragment
-import com.tencent.qqmusic.innovation.common.logging.MLog
-import com.tencent.qqmusic.innovation.common.util.UtilContext
+import com.tencent.qqmusicsdk.protocol.PlayDefine
 import com.tencent.qqmusicsdk.protocol.PlayStateHelper
 import com.tencent.qqmusictvsdk.QQMusicSDK
 import com.tencent.qqmusictvsdk.player.*
@@ -33,7 +25,6 @@ import com.tencent.qqmusictvsdk.player.Event.API_EVENT_PLAY_STATE_CHANGED
 import com.tencent.qqmusictvsdk.player.Event.API_EVENT_SONG_PLAY_ERROR
 import com.tencent.qqmusictvsdk.player.PlayerEnums.Mode.ONE
 import com.tencent.qqmusictvsdkdemo.R
-import kotlin.coroutines.resume
 
 
 /*
@@ -48,7 +39,7 @@ class PlayerFragment : Fragment() {
         const val TAG = "PlayerFragment"
     }
     private fun getMV(): ArrayList<MVInfo> {
-        return ArrayList(listOf("n003541cj5u","s0019nmbrrx", "w0016esuaxk", "i0034xbq2g9").map {
+        return ArrayList(listOf("s0019nmbrrx", "w0016esuaxk", "i0034xbq2g9").map {
             MVInfo().also { mv ->
                 mv.mv_vid = it
             }
@@ -93,6 +84,10 @@ class PlayerFragment : Fragment() {
     lateinit var songQuality: Spinner
     lateinit var mvResolution: Spinner
     lateinit var soundEffect: Spinner
+    // 屏幕尺寸
+    private var mSurfaceViewWidth = 0
+    private var mSurfaceViewHeight = 0
+    private var mvView: View? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -130,6 +125,7 @@ class PlayerFragment : Fragment() {
                         if (code == ERROR_OK) {
                             totleTime.text = playerManager.getDuration()?.let { getTime(it) }
                             timeHandler.sendEmptyMessageDelayed(0, 1000)
+                            playerManager.setPlayMode(PlayDefine.PlayMode.PLAY_MODE_LIST_SHUFFLE_REPEAT)
                         }
                     }
                 }
@@ -154,6 +150,27 @@ class PlayerFragment : Fragment() {
                     var width = arg.getInt(Key.API_EVENT_KEY_MV_SIZE_WIDTH)
                     var height = arg.getInt(Key.API_EVENT_KEY_MV_SIZE_HEIGHT)
                     Log.d(TAG, "API_EVENT_PLAY_MV_SIZE_CHANGED width= $width, height = $height")
+                    // 获取屏幕宽度
+                    if (mSurfaceViewWidth == 0 && mSurfaceViewHeight == 0) {
+                        mSurfaceViewHeight = startPlayMV.height
+                        mSurfaceViewWidth = startPlayMV.width
+                    }
+                    Log.d(TAG, "onVideoSizeChanged mSurfaceViewWidth:$mSurfaceViewWidth mSurfaceViewHeight:$mSurfaceViewHeight")
+
+                    // 有可能空指针，获取失败
+                    if (mSurfaceViewWidth == 0 && mSurfaceViewHeight == 0) return
+                    val w: Int = mSurfaceViewHeight * width / height
+                    var margin: Int = (mSurfaceViewWidth - w) / 2
+                    if (margin < 0) {
+                        margin = 0
+                    }
+                    mvView?.post {
+                        Log.d(TAG, "margin:$margin")
+                        val lp = FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                            ViewGroup.LayoutParams.MATCH_PARENT)
+                        lp.setMargins(margin, 0, margin, 0)
+                        mvView?.layoutParams = lp
+                    }
                 }
                 API_EVENT_LIVE_STATUS_CHANGED -> {
                     var liveStatus = arg.getInt(Key.API_EVENT_KEY_LIVE_STATUS)
@@ -184,27 +201,27 @@ class PlayerFragment : Fragment() {
     private val clickListener = View.OnClickListener {
         when(it?.id) {
             R.id.playMV -> {
-                var mvView = playerManager.playMV(getMV(), 0) as View
+                mvView = playerManager.playMV(getMV(), 0) as View
                 playerManager.setPlayMode(ONE)
-                mvView.layoutParams = FrameLayout.LayoutParams(
+                mvView?.layoutParams = FrameLayout.LayoutParams(
                     ConstraintLayout.LayoutParams.MATCH_PARENT,
                     ConstraintLayout.LayoutParams.MATCH_PARENT
                 )
-                mvView.visibility = View.VISIBLE
-                val vg = mvView.parent
+                mvView?.visibility = View.VISIBLE
+                val vg = mvView?.parent
                 if (vg != null) {
                     (vg as ViewGroup).removeViewInLayout(mvView)
                 }
                 startPlayMV.addView(mvView)
             }
             R.id.playShow -> {
-                var mvView = playerManager.playLive(getShow()) as View
-                mvView.layoutParams = FrameLayout.LayoutParams(
+                mvView = playerManager.playLive(getShow()) as View
+                mvView?.layoutParams = FrameLayout.LayoutParams(
                     ConstraintLayout.LayoutParams.MATCH_PARENT,
                     ConstraintLayout.LayoutParams.MATCH_PARENT
                 )
-                mvView.visibility = View.VISIBLE
-                val vg = mvView.parent
+                mvView?.visibility = View.VISIBLE
+                val vg = mvView?.parent
                 if (vg != null) {
                     (vg as ViewGroup).removeViewInLayout(mvView)
                 }
