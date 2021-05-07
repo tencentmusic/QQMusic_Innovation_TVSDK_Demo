@@ -38,8 +38,9 @@ class PlayerFragment : Fragment() {
     companion object {
         const val TAG = "PlayerFragment"
     }
+    var mCurState = 0
     private fun getMV(): ArrayList<MVInfo> {
-        return ArrayList(listOf("s0019nmbrrx", "w0016esuaxk", "i0034xbq2g9").map {
+        return ArrayList(listOf("s0019nmbrrx", "w0016esuaxk", "i0034xbq2g9", "p00255mycqc").map {
             MVInfo().also { mv ->
                 mv.mv_vid = it
             }
@@ -60,7 +61,7 @@ class PlayerFragment : Fragment() {
 
     private fun getSongs(): ArrayList<SongInfo> {
 
-        return ArrayList(listOf("002XWgfo0IKPOH", "000CkeJf1hyLH2", "0033N6Jr4DvOl9", "004Z8Ihr0JIu5s").map {
+        return ArrayList(listOf("002mgwYN4RxXNu","002XWgfo0IKPOH", "000CkeJf1hyLH2", "0033N6Jr4DvOl9", "004Z8Ihr0JIu5s").map {
             SongInfo().also { song ->
                 song.song_mid = it
             }
@@ -93,7 +94,6 @@ class PlayerFragment : Fragment() {
         super.onCreate(savedInstanceState)
         playerManager = QQMusicSDK.getPlayerManager()
         playerManager.registerEventListener(mIMediaEventListener)
-
     }
 
 
@@ -107,9 +107,10 @@ class PlayerFragment : Fragment() {
             Log.d(TAG, "onEvent event = $event, arg = $arg")
             when(event) {
                 API_EVENT_PLAY_STATE_CHANGED -> {
-                    if (PlayStateHelper.isPlayingForUI()) {
+                    mCurState = arg.getInt(Key.API_EVENT_KEY_PLAY_STATE)
+                    if (PlayStateHelper.isPlayingForUI(mCurState)) {
                         play.text = "Pause"
-                    } else if (PlayStateHelper.isPausedForUI()) {
+                    } else if (PlayStateHelper.isPausedForUI(mCurState)) {
                         play.text = "Play"
                     }
                 }
@@ -237,10 +238,10 @@ class PlayerFragment : Fragment() {
                 playerManager.prev()
             }
             R.id.play -> {
-                if (PlayStateHelper.isPlayingForUI()) {
+                if (PlayStateHelper.isPlayingForUI(mCurState)) {
                     playerManager.pause()
                     playerManager.updatePlayingSongList()
-                } else if (PlayStateHelper.isPausedForUI()) {
+                } else if (PlayStateHelper.isPausedForUI(mCurState)) {
                     playerManager.play()
                 }
             }
@@ -310,10 +311,10 @@ class PlayerFragment : Fragment() {
 
             override fun onItemSelected(p0: AdapterView<*>?, p1: View?, pos: Int, id: Long) {
                 when(pos) {
-                    0 -> playerManager.setMVResolution(PlayerEnums.Resolution.LAN_GUANG)
-                    1 -> playerManager.setMVResolution(PlayerEnums.Resolution.CHAO_QING)
-                    2 -> playerManager.setMVResolution(PlayerEnums.Resolution.GAO_QING)
-                    3 -> playerManager.setMVResolution(PlayerEnums.Resolution.BIAO_QING)
+                    0 -> playerManager.setMVResolution(PlayerEnums.Resolution.LAN_GUANG, true)
+                    1 -> playerManager.setMVResolution(PlayerEnums.Resolution.CHAO_QING, true)
+                    2 -> playerManager.setMVResolution(PlayerEnums.Resolution.GAO_QING, true)
+                    3 -> playerManager.setMVResolution(PlayerEnums.Resolution.BIAO_QING, true)
                 }
             }
         }
