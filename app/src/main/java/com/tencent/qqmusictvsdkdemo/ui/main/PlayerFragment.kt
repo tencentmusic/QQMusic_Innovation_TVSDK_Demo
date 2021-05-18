@@ -11,6 +11,7 @@ import android.view.ViewGroup
 import android.widget.*
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.fragment.app.Fragment
+import com.tencent.config.QQMusicConfig
 import com.tencent.qqmusicsdk.protocol.PlayDefine
 import com.tencent.qqmusicsdk.protocol.PlayStateHelper
 import com.tencent.qqmusictvsdk.QQMusicSDK
@@ -94,6 +95,7 @@ class PlayerFragment : Fragment() {
         super.onCreate(savedInstanceState)
         playerManager = QQMusicSDK.getPlayerManager()
         playerManager.registerEventListener(mIMediaEventListener)
+        QQMusicConfig.setVideoPlayerType(true)
     }
 
 
