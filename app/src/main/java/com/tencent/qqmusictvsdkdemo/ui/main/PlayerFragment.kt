@@ -41,7 +41,7 @@ class PlayerFragment : Fragment() {
     }
     var mCurState = 0
     private fun getMV(): ArrayList<MVInfo> {
-        return ArrayList(listOf("s0019nmbrrx", "w0016esuaxk", "i0034xbq2g9", "p00255mycqc").map {
+        return ArrayList(listOf("s0019nmbrrx", "w0016esuaxk", "i0034xbq2g9", "p00255mycqc", "0140yQyz2pwDlC").map {
             MVInfo().also { mv ->
                 mv.mv_vid = it
             }
@@ -96,6 +96,7 @@ class PlayerFragment : Fragment() {
         playerManager = QQMusicSDK.getPlayerManager()
         playerManager.registerEventListener(mIMediaEventListener)
         QQMusicConfig.setVideoPlayerType(true)
+        QQMusicConfig.setVideoSurfaceType(true)
     }
 
 
@@ -114,12 +115,15 @@ class PlayerFragment : Fragment() {
                         play.text = "Pause"
                     } else if (PlayStateHelper.isPausedForUI(mCurState)) {
                         play.text = "Play"
+                    } else if (PlayStateHelper.isBufferingForUI(mCurState)) {
+                        play.text = "Buffering"
                     }
                 }
                 API_EVENT_PLAY_SONG_CHANGED -> {
                     uiThread {
                         mSongInfo = playerManager.getCurrentSongInfo()
                         songinfo.text = "${mSongInfo?.song_name}---${mSongInfo?.singer_name}"
+                        songQuality.setSelection(getSongQualityIndex())
                     }
                 }
                 API_EVENT_SONG_PLAY_ERROR -> {
@@ -146,7 +150,9 @@ class PlayerFragment : Fragment() {
                 API_EVENT_PLAY_MV_DEFINITION_CHANGED -> {
                     var defList = arg.getStringArrayList(Key.API_EVENT_KEY_MV_DEFINITION_LIST)
                     var curDef = arg.getString(Key.API_EVENT_KEY_MV_CUR_DEFINITION)
-
+                    uiThread {
+                        mvResolution.setSelection(getMvResolutionIndex(curDef))
+                    }
                     Log.d(TAG, "API_EVENT_PLAY_MV_DEFINITION_CHANGED defList= $defList, curDef = $curDef")
                 }
                 API_EVENT_PLAY_MV_SIZE_CHANGED -> {
@@ -181,6 +187,24 @@ class PlayerFragment : Fragment() {
                     Log.d(TAG, "API_EVENT_LIVE_STATUS_CHANGED liveStatus= $liveStatus, waitTime = $waitTime")
                 }
             }
+        }
+    }
+
+    private fun getMvResolutionIndex(def: String?): Int {
+        return when (def) {
+            "sd" -> 3
+            "hd" -> 2
+            "shd" -> 1
+            "fhd" -> 0
+            else -> 3
+        }
+    }
+    private fun getSongQualityIndex(): Int {
+        return when (playerManager.getSongQuality()) {
+            PlayDefine.MusicQuality.SONG_BIT_TYPE_WIFI_SQ -> 2
+            PlayDefine.MusicQuality.SONG_BIT_TYPE_WIFI_HIGH -> 1
+            PlayDefine.MusicQuality.SONG_BIT_TYPE_WIFI_STANDARD -> 0
+            else -> 0
         }
     }
 
